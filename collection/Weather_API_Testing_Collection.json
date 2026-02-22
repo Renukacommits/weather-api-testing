@@ -1,0 +1,1831 @@
+{
+  "info": {
+    "_postman_id": "8824aab1-881a-4189-914f-5925545b0427",
+    "name": "Project 1 - Weather API Testing: OpenWeatherMap",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "45739347"
+  },
+  "item": [
+    {
+      "name": "1. Current Weather by City name",
+      "item": [
+        {
+          "name": "Authentication errors",
+          "item": [
+            {
+              "name": "Get Weather - Missing API Key (401)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// 1: Status check and response\r",
+                      "pm.test(\"Status code is 401\", function () {\r",
+                      "    pm.response.to.have.status(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 2000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                      "});\r",
+                      "\r",
+                      "// 2: Response and schema structure\r",
+                      "pm.test(\"Content Type is json\", function(){\r",
+                      "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                      "});\r",
+                      "\r",
+                      "var jsonData = pm.response.json();\r",
+                      "\r",
+                      "// 3: Check if the response has the correct error properties.\r",
+                      "pm.test(\"Response has error properties\", function(){\r",
+                      "    pm.expect(jsonData).to.have.property(\"cod\");\r",
+                      "    pm.expect(jsonData).to.have.property(\"message\");\r",
+                      "});\r",
+                      "\r",
+                      "// 4: Check if the error information is explanatory\r",
+                      "pm.test(\"Error code is correct\", function(){\r",
+                      "    pm.expect(jsonData.cod).to.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Error message is correct\", function(){\r",
+                      "    pm.expect(jsonData.message).to.include(\"Invalid API key\");\r",
+                      "    });\r",
+                      "\r",
+                      "// 5: Business Rule \r",
+                      "pm.test(\"Response does not return Weather Data\", function(){\r",
+                      "    pm.expect(jsonData).to.not.have.property(\"weather\");\r",
+                      "    pm.expect(jsonData).to.not.have.property(\"main\");\r",
+                      "    pm.expect(jsonData).to.not.have.property(\"coord\");\r",
+                      "})"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/weather?q=London&units=metric",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "weather"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "London"
+                    },
+                    {
+                      "key": "units",
+                      "value": "metric"
+                    }
+                  ]
+                },
+                "description": "## Get Current Weather - Missing API Key (401)\n\n**Purpose:** Verify API requires authentication and handles missing API key correctly.\n\n**Test Case:** Security test - Request without authentication\n\n**Parameters:**\n\n- q: London (valid city)\n    \n- units: metric\n    \n- appid: MISSING (intentionally omitted)\n    \n\n**Expected Result:**\n\n- Status: 401 Unauthorized\n    \n- Error message about invalid/missing API key\n    \n- No weather data returned\n    \n\n**Tests:**\n\n- Status code 401\n    \n- Error message about authentication\n    \n- No sensitive data leaked"
+              },
+              "response": []
+            },
+            {
+              "name": "Get Weather - Invalid API Key (401)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "packages": {},
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/weather?q=London&appid=INVALID123&units=metric",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "weather"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "London"
+                    },
+                    {
+                      "key": "appid",
+                      "value": "INVALID123"
+                    },
+                    {
+                      "key": "units",
+                      "value": "metric"
+                    }
+                  ]
+                },
+                "description": "## Get Current Weather - Invalid API Key (401)\n\n**Purpose:** Verify API rejects invalid/incorrect API keys.\n\n**Test Case:** Security test - Request with wrong API key\n\n**Parameters:**\n\n- q: London (valid city)\n    \n- appid: INVALID123 (intentionally wrong)\n    \n- units: metric\n    \n\n**Expected Result:**\n\n- Status: 401 Unauthorized\n    \n- Error message about invalid API key\n    \n- No weather data returned\n    \n\n**Tests:**\n\n- Status code 401\n    \n- Error message about authentication\n    \n- No data leak"
+              },
+              "response": []
+            }
+          ],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  ""
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "// 1: Status check and response\r",
+                  "pm.test(\"Status code is 401\", function () {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "// 2: Response and schema structure\r",
+                  "pm.test(\"Content Type is json\", function(){\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "var jsonData = pm.response.json();\r",
+                  "\r",
+                  "// 3: Check if the response has the correct error properties.\r",
+                  "pm.test(\"Response has error properties\", function(){\r",
+                  "    pm.expect(jsonData).to.have.property(\"cod\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"message\");\r",
+                  "});\r",
+                  "\r",
+                  "// 4: Check if the error information is explanatory\r",
+                  "pm.test(\"Error code is correct\", function(){\r",
+                  "    pm.expect(jsonData.cod).to.equal(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error message is correct\", function(){\r",
+                  "    pm.expect(jsonData.message.toLowerCase()).to.include(\"invalid api key\");\r",
+                  "    });\r",
+                  "\r",
+                  "// 5: Business Rule \r",
+                  "pm.test(\"Response does not return Weather Data\", function(){\r",
+                  "    pm.expect(jsonData).to.not.have.property(\"weather\");\r",
+                  "    pm.expect(jsonData).to.not.have.property(\"main\");\r",
+                  "    pm.expect(jsonData).to.not.have.property(\"coord\");\r",
+                  "})"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Weather - Valid City",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//1. Status and Response success\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response has all top-level fields\", function(){\r",
+                  "    pm.expect(response).to.have.property(\"coord\");\r",
+                  "    pm.expect(response).to.have.property(\"weather\");\r",
+                  "    pm.expect(response).to.have.property(\"base\");\r",
+                  "    pm.expect(response).to.have.property(\"main\");\r",
+                  "    pm.expect(response).to.have.property(\"visibility\");\r",
+                  "\r",
+                  "});\r",
+                  "\r",
+                  "//3. Data Type Validation\r",
+                  "\r",
+                  "pm.test(\"Data types are correct\", function(){\r",
+                  "    pm.expect(response.name).to.be.a('string');\r",
+                  "    pm.expect(response.sys.country).to.be.a('string');\r",
+                  "    pm.expect(response.main.temp).to.be.a('number');\r",
+                  "    pm.expect(response.weather).to.be.an('array');\r",
+                  "\r",
+                  "\r",
+                  "})\r",
+                  "\r",
+                  "//2. Weather Data validation\r",
+                  "\r",
+                  "pm.test(\"Temperature is in valid range\", function(){\r",
+                  "    pm.expect(response.main.temp).to.be.within(-100, 60);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Wind speed is in valid range\", function () {\r",
+                  "    pm.expect(response.wind.speed).to.be.within(0, 100);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Weather array is not empty\", function(){\r",
+                  "    pm.expect(response.weather).to.have.length.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Weather description is exists\", function () {\r",
+                  "    pm.expect(response.weather[0]).to.have.property(\"description\");\r",
+                  "    pm.expect(response.weather[0].description).to.be.a(\"string\");\r",
+                  "    pm.expect(response.weather[0].description.length).to.be.above(0);\r",
+                  "\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Humidity is valid percentage\", function () {\r",
+                  "    pm.expect(response.main.humidity).to.be.a(\"number\");\r",
+                  "    pm.expect(response.main.humidity).to.be.within(0, 100);\r",
+                  "\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "//5. Business Logic\r",
+                  "\r",
+                  "pm.test(\"City name matches the request\", function(){\r",
+                  "    pm.expect(response.name.toLowerCase()).to.eql('london');\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "     \r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?q=London&appid={{apiKey}}&units=metric",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "London"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "units",
+                  "value": "metric"
+                }
+              ]
+            },
+            "description": "## Get Current Weather - Valid City\n\n**Purpose:** Verify API returns correct weather data for a valid city name.\n\n**Test Case:** Happy path - User requests weather for London\n\n**Parameters:**\n\n- q: London (city name)\n    \n- appid: API key (from environment)\n    \n- units: metric (Celsius)\n    \n\n**Expected Result:**\n\n- Status: 200 OK\n    \n- Response contains: temperature, humidity, weather description, city name\n    \n- All data types valid\n    \n- Temperature in reasonable range\n    \n\n**Tests:**\n\n- Status code validation\n    \n- Response structure\n    \n- Data type validation\n    \n- Weather data accuracy\n    \n- Response time check"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Weather - Invalid City (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//1. Correct error status and response time\r",
+                  "pm.test(\"Status code is 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response contains error information\", function(){\r",
+                  "    pm.expect(response).to.have.property('cod');\r",
+                  "    pm.expect(response).to.have.property('message');\r",
+                  "});\r",
+                  "\r",
+                  "//3. Error code validation\r",
+                  "\r",
+                  "pm.test(\"Error code is 404\", function(){\r",
+                  "    pm.expect(response.cod).to.equal('404');\r",
+                  "})\r",
+                  "\r",
+                  "\r",
+                  "//4. Error message Validation: The error message should not be empty and should contain the word \"not found\".\r",
+                  "pm.test(\"Error message exists and is informative\", function(){\r",
+                  "    pm.expect(response.message.length).to.be.above(0);\r",
+                  "    pm.expect(response.message).to.be.a('string');\r",
+                  "    pm.expect(response.message.toLowerCase()).to.include('not found');\r",
+                  "\r",
+                  "});\r",
+                  "\r",
+                  "//5. Business Rule: No weather Data \r",
+                  "pm.test(\"No weather data returned\", function(){\r",
+                  "    pm.expect(response).to.not.have.property('weather');\r",
+                  "    pm.expect(response).to.not.have.property('main');\r",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?q=InvalidCityXYZ123&appid={{apiKey}}&units=metric",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "InvalidCityXYZ123"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "units",
+                  "value": "metric"
+                }
+              ]
+            },
+            "description": "## Get Current Weather - Invalid City (404)\n\n**Purpose:** Verify API handles invalid city names correctly.\n\n**Test Case:** Negative test - User requests weather for non-existent city\n\n**Parameters:**\n\n- q: InvalidCityXYZ123 (intentionally invalid)\n    \n- appid: API key\n    \n- units: metric\n    \n\n**Expected Result:**\n\n- Status: 404 Not Found\n    \n- Error message in response\n    \n- No weather data returned\n    \n\n**Tests:**\n\n- Status code 404\n    \n- Response contains error message\n    \n- Response structure for errors"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Weather - City Name Case Insensitive",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//Request Success\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "\r",
+                  "//Required fields exists\r",
+                  "pm.test(\"Response has required top-level fields\", function () {\r",
+                  "    pm.expect(response).to.have.property('weather');\r",
+                  "    pm.expect(response).to.have.property('main');\r",
+                  "    pm.expect(response).to.have.property('name');\r",
+                  "});\r",
+                  "\r",
+                  "//Data Type Validation\r",
+                  "pm.test(\"Data types are correct\", function () {\r",
+                  "    pm.expect(response.name).to.be.a('string');\r",
+                  "    pm.expect(response.main.temp).to.be.a('number');\r",
+                  "    pm.expect(response.weather).to.be.an('array');\r",
+                  "});\r",
+                  "\r",
+                  "//Weather Array is not empty\r",
+                  "pm.test(\"Weather array is not empty\", function () {\r",
+                  "    pm.expect(response.weather.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "//Business logic: Case sensitivity handling\r",
+                  "pm.test(\"City name matches despite any case difference\", function () {\r",
+                  "    pm.expect(response.name.toLowerCase()).to.eql('london');\r",
+                  "});\r",
+                  "\r",
+                  "//Weather data is complete\r",
+                  "pm.test(\"Weather data is valid and complete\", function () {\r",
+                  "    pm.expect(response.main).to.have.property('temp');\r",
+                  "    pm.expect(response.main).to.have.property('humidity');\r",
+                  "    pm.expect(response).to.have.property('visibility');\r",
+                  "\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?q=LONDON&appid={{apiKey}}&units=metric",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "LONDON"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "units",
+                  "value": "metric"
+                }
+              ]
+            },
+            "description": "## Get Current Weather - City Name Case Insensitive\n\n**Purpose:** Verify API handles city names regardless of capitalization.\n\n**Test Case:** User types city name in all caps\n\n**Parameters:**\n\n- q: LONDON (all caps)\n    \n- appid: API key\n    \n- units: metric\n    \n\n**Expected Result:**\n\n- Status: 200 OK\n    \n- Returns weather for London\n    \n- Same data as lowercase \"london\" request\n    \n\n**Tests:**\n\n- Status code 200\n    \n- Response structure valid\n    \n- City name returned correctly (London)\n    \n- Weather data present"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Weather - City Name with Spaces",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1: Response Success\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "\r",
+                  "\r",
+                  "//2: Required fields exists\r",
+                  "pm.test(\"Response has required top-level fields\", function () {\r",
+                  "    pm.expect(response).to.have.property('weather');\r",
+                  "    pm.expect(response).to.have.property('main');\r",
+                  "    pm.expect(response).to.have.property('name');\r",
+                  "});\r",
+                  "\r",
+                  "//3: Data Type Validation\r",
+                  "pm.test(\"Data types are correct\", function () {\r",
+                  "    pm.expect(response.name).to.be.a('string');\r",
+                  "    pm.expect(response.main.temp).to.be.a('number');\r",
+                  "    pm.expect(response.weather).to.be.an('array');\r",
+                  "});\r",
+                  "\r",
+                  "//4: Weather Array is not empty\r",
+                  "pm.test(\"Weather array is not empty\", function () {\r",
+                  "    pm.expect(response.weather.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "//Weather data is complete\r",
+                  "pm.test(\"Weather data is valid and complete\", function () {\r",
+                  "    pm.expect(response.main).to.have.property('temp');\r",
+                  "    pm.expect(response.main).to.have.property('humidity');\r",
+                  "    pm.expect(response).to.have.property('visibility');\r",
+                  "\r",
+                  "});\r",
+                  "\r",
+                  "//Humidity range\r",
+                  "pm.test(\"Humidity is within expected range\", function () {\r",
+                  "    pm.expect(response.main.humidity).to.be.within(0,100);\r",
+                  "});\r",
+                  "\r",
+                  "//temperature range\r",
+                  "pm.test(\"Temperature is within expected range\", function () {\r",
+                  "    pm.expect(response.main.temp).to.be.within(223,323);\r",
+                  "});\r",
+                  "\r",
+                  "//Business logic: handling spaces\r",
+                  "pm.test(\"City name matches despite any spaces\", function () {\r",
+                  "    pm.expect(response.name.toLowerCase()).to.eql('new york');\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?q=New York&appid={{apiKey}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "New York"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                }
+              ]
+            },
+            "description": "# TC006: Get Current Weather - City Name with Spaces\n\n**Purpose:**\n\nVerify API handles city names containing spaces.\n\n**Test Case:**\n\nEdge case - User provides city with space in name\n\n**Parameters:**\n\n• q: New York (contains space)\n\n• appid: {{apiKey}}\n\n• units: metric\n\n**Expected Result:**\n\n• Status: 200 OK\n\n• Returns weather for New York\n\n• Handles spaces correctly\n\n• City name includes both words\n\n**Tests:**\n\n• Status code validation (200)\n\n• Response time check (< 2000ms)\n\n• Content-Type validation (JSON)\n\n• Response structure validation\n\n• Data type validation\n\n• Weather array validation\n\n• City name contains 'new york'\n\n• Temperature and humidity in valid ranges"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Weather - City Name with Special Characters",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1: Response Success\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Content-Type is JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "//2: Required fields exists\r",
+                  "pm.test(\"Response has required top-level fields\", function () {\r",
+                  "    pm.expect(response).to.have.property('weather');\r",
+                  "    pm.expect(response).to.have.property('main');\r",
+                  "    pm.expect(response).to.have.property('name');\r",
+                  "});\r",
+                  "\r",
+                  "//3: Data Type Validation\r",
+                  "pm.test(\"Data types are correct\", function () {\r",
+                  "    pm.expect(response.name).to.be.a('string');\r",
+                  "    pm.expect(response.main.temp).to.be.a('number');\r",
+                  "    pm.expect(response.weather).to.be.an('array');\r",
+                  "});\r",
+                  "\r",
+                  "//4: Weather Array is not empty\r",
+                  "pm.test(\"Weather array is not empty\", function () {\r",
+                  "    pm.expect(response.weather.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "//Weather data is complete\r",
+                  "pm.test(\"Weather data is valid and complete\", function () {\r",
+                  "    pm.expect(response.main).to.have.property('temp');\r",
+                  "    pm.expect(response.main).to.have.property('humidity');\r",
+                  "    pm.expect(response).to.have.property('main');\r",
+                  "\r",
+                  "});\r",
+                  "\r",
+                  "//Humidity range\r",
+                  "pm.test(\"Humidity is within expected range\", function () {\r",
+                  "    pm.expect(response.main.humidity).to.be.within(0,100);\r",
+                  "});\r",
+                  "\r",
+                  "//temperature range\r",
+                  "pm.test(\"Temperature is within expected range\", function () {\r",
+                  "    pm.expect(response.main.temp).to.be.within(223,323); //Kelvin range\r",
+                  "});\r",
+                  "\r",
+                  "//Business logic: handling special chars\r",
+                  "pm.test(\"City name matches despite any spaces\", function () {\r",
+                  "    pm.expect(response.name.toLowerCase()).to.include('são paulo');\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?q=São Paulo&appid={{apiKey}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "São Paulo"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                }
+              ]
+            },
+            "description": "# TC007: Get Current Weather - City Name with Special Characters\n\n**Purpose:**\n\nVerify API handles city names with special/accented characters.\n\n**Test Case:**\n\nEdge case - User provides city with accented characters\n\n**Parameters:**\n\n• q: São Paulo (contains ã)\n\n• appid: {{apiKey}}\n\n• units: metric\n\n**Expected Result:**\n\n• Status: 200 OK\n\n• Returns weather for São Paulo\n\n• Handles special characters correctly\n\n• City data accurate\n\n**Tests:**\n\n• Status code validation (200)\n\n• Response time check (<2000ms)\n\n• Content-Type validation (JSON)\n\n• Response structure validation\n\n• Data type validation\n\n• Weather array validation\n\n• City name present\n\n• Coordinates valid"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Weather - Empty City Name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//1. Correct error status and response time\r",
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Content-Type is JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response contains error information\", function(){\r",
+                  "    pm.expect(response).to.have.property('cod');\r",
+                  "    pm.expect(response).to.have.property('message');\r",
+                  "});\r",
+                  "\r",
+                  "//3. Error code validation\r",
+                  "\r",
+                  "pm.test(\"Error code is 400\", function(){\r",
+                  "    pm.expect(response.cod).to.equal('400');\r",
+                  "})\r",
+                  "\r",
+                  "\r",
+                  "//4. The error message should not be empty\r",
+                  "pm.test(\"Error message exists and is informative\", function(){\r",
+                  "    pm.expect(response.message.length).to.be.above(0);\r",
+                  "    pm.expect(response.message).to.be.a('string');\r",
+                  "    pm.expect(response.message.toLowerCase()).to.include('nothing to geocode');\r",
+                  "\r",
+                  "});\r",
+                  "\r",
+                  "//5. Business Rule: No weather Data \r",
+                  "pm.test(\"No weather data returned\", function(){\r",
+                  "    pm.expect(response).to.not.have.property('weather');\r",
+                  "    pm.expect(response).to.not.have.property('main');\r",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?q=&appid={{apiKey}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": ""
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                }
+              ]
+            },
+            "description": "# TC008: Get Current Weather - Empty City Name\n\n**Purpose:**\n\nVerify API returns error for empty city name parameter.\n\n**Test Case:**\n\nNegative test - User provides empty city name\n\n**Parameters:**\n\n• q: (empty string)\n\n• appid: {{apiKey}}\n\n• units: metric\n\n**Expected Result:**\n\n• Status: 400 Bad Request\n\n• Error message about invalid input\n\n• No weather data returned\n\n**Tests:**\n\n• Status code validation (400)\n\n• Response time check (< 2000ms)\n\n• Content-Type validation (JSON)\n\n• Error properties validation\n\n• Error message present\n\n• Absence of weather data validation"
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              "// This runs AUTOMATICALLY for every request in the collection\r",
+              "pm.test(\"Response time is acceptable\", function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Content-Type is JSON\", function () {\r",
+              "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Current Weather by Coordinates",
+      "item": [
+        {
+          "name": "Get Weather - Valid Coordinates (London)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Content Type is JSON\", function(){\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response has all top-level fields\", function(){\r",
+                  "    pm.expect(response).to.have.property(\"coord\");\r",
+                  "    pm.expect(response).to.have.property(\"weather\");\r",
+                  "    pm.expect(response).to.have.property(\"base\");\r",
+                  "    pm.expect(response).to.have.property(\"main\");\r",
+                  "    pm.expect(response).to.have.property(\"visibility\");\r",
+                  "\r",
+                  "});\r",
+                  "\r",
+                  "//3. Data Type Validation\r",
+                  "\r",
+                  "pm.test(\"Data types are correct\", function(){\r",
+                  "     pm.expect(response.coord).to.be.an('object');\r",
+                  "    pm.expect(response.coord.lat).to.be.a('number');\r",
+                  "    pm.expect(response.coord.lon).to.be.a('number');\r",
+                  "\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Weather data types are correct\", function () {\r",
+                  "    pm.expect(response.name).to.be.a('string');\r",
+                  "    pm.expect(response.main.temp).to.be.a('number');\r",
+                  "    pm.expect(response.main.humidity).to.be.a('number');\r",
+                  "    pm.expect(response.weather).to.be.an('array');\r",
+                  "});\r",
+                  "\r",
+                  "// 4: Array Validation\r",
+                  "pm.test(\"Weather array is not empty\", function () {\r",
+                  "    pm.expect(response.weather.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Latitude matches request (within tolerance)\", function(){\r",
+                  "    pm.expect(response.coord.lat).to.be.closeTo(51.5074, 0.01);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Longitude matches request (within tolerance)\", function(){\r",
+                  "    pm.expect(response.coord.lon).to.be.closeTo(-0.1278, 0.01);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Temperature is in valid range\", function(){\r",
+                  "    pm.expect(response.main.temp).to.be.within(-100, 60);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Humidity is in valid range\", function () {\r",
+                  "    pm.expect(response.main.humidity).to.be.within(0, 100);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?lat=51.5074&lon=-0.1278&appid={{apiKey}}&units=metric",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "lat",
+                  "value": "51.5074"
+                },
+                {
+                  "key": "lon",
+                  "value": "-0.1278"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "units",
+                  "value": "metric"
+                }
+              ]
+            },
+            "description": "# TC009: Get Current Weather - Valid Coordinates\n\n**Purpose:**\n\nVerify API returns correct weather data when searched by GPS coordinates.\n\n**Test Case:**\n\nHappy path - User provides latitude and longitude for London\n\n**Parameters:**\n\n• lat: 51.5074 (London latitude)\n\n• lon: -0.1278 (London longitude)\n\n• appid: {{apiKey}}\n\n• units: metric\n\n**Expected Result:**\n\n• Status: 200 OK\n\n• Response contains weather data\n\n• Coordinates in response match request (±0.01 tolerance)\n\n• All data types valid\n\n**Tests:**\n\n• Status code validation (200)\n\n• Response time check (<2000ms)\n\n• Content-Type validation (JSON)\n\n• Response structure validation\n\n• Coordinate data type validation\n\n• Weather data type validation\n\n• Weather array validation\n\n• Latitude matches request (within 0.01)\n\n• Longitude matches request(within 0.01)\n\n• Temperature range validation\n\n• Humidity range validation"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Weather - Invalid Coordinates",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1: Request Success (expecting error)\r",
+                  "pm.test(\"Status code is 400 or 404\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 404]);\r",
+                  "\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is acceptable\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "// 2: Response Structure\r",
+                  "pm.test(\"Content-Type is JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response has error properties\", function () {\r",
+                  "    pm.expect(response).to.have.property('message');\r",
+                  "    pm.expect(response).to.have.property('cod');\r",
+                  "});\r",
+                  "\r",
+                  "// 5: Business Logic - No Weather Data\r",
+                  "pm.test(\"Response does NOT contain weather data\", function () {\r",
+                  "    pm.expect(response).to.not.have.property('weather');\r",
+                  "    pm.expect(response).to.not.have.property('main');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error message is meaningful\", function(){\r",
+                  "    pm.expect(response.message).to.be.a('string');\r",
+                  "    pm.expect(response.message).to.include('wrong latitude');\r",
+                  "    pm.expect(response.message.length).to.be.above(0);\r",
+                  "\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?lat=999.999&lon=-999.999&appid={{apiKey}}&units=metric",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "lat",
+                  "value": "999.999"
+                },
+                {
+                  "key": "lon",
+                  "value": "-999.999"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "units",
+                  "value": "metric"
+                }
+              ]
+            },
+            "description": "## TC010: Get Current Weather - Invalid Coordinates\n\n**Purpose:**\n\nVerify API returns appropriate error for out-of-range coordinates.\n\n**Test Case:**\n\nNegative test - User provides invalid coordinate values\n\n**Parameters:**\n\n• lat: 999.999 (invalid - max is 90)\n\n• lon: -999.999 (invalid - max is 180)\n\n• appid: {{apiKey}}\n\n• units: metric\n\n**Expected Result:**\n\n• Status: 400 Bad Request or 404 Not Found\n\n• Error message about invalid coordinates\n\n• No weather data returned\n\n**Tests:**\n\n• Status code validation (400 or  \n404)\n\n• Response time check (<2000ms)\n\n• Content-Type validation (JSON)\n\n• Error properties validation\n\n• Error message meaningful\n\n• Absence of weather data validation"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Current Weather by City ID",
+      "item": [
+        {
+          "name": "Get Current Weather - Valid City ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1: Request Success\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "// 2: Response Structure\r",
+                  "pm.test(\"Content-Type is JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response has required top-level fields\", function () {\r",
+                  "    pm.expect(response).to.have.property('id');\r",
+                  "    pm.expect(response).to.have.property('name');\r",
+                  "    pm.expect(response).to.have.property('weather');\r",
+                  "    pm.expect(response).to.have.property('main');\r",
+                  "    pm.expect(response).to.have.property('coord');\r",
+                  "});\r",
+                  "\r",
+                  "// 3: Data Type Validation\r",
+                  "pm.test(\"City ID data type is correct\", function () {\r",
+                  "    pm.expect(response.id).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Weather data types are correct\", function () {\r",
+                  "    pm.expect(response.name).to.be.a('string');\r",
+                  "    pm.expect(response.main.temp).to.be.a('number');\r",
+                  "    pm.expect(response.main.humidity).to.be.a('number');\r",
+                  "    pm.expect(response.weather).to.be.an('array');\r",
+                  "});\r",
+                  "\r",
+                  "// 4: Array Validation\r",
+                  "pm.test(\"Weather array is not empty\", function () {\r",
+                  "    pm.expect(response.weather.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Weather array contains description\", function () {\r",
+                  "    pm.expect(response.weather[0]).to.have.property('description');\r",
+                  "    pm.expect(response.weather[0].description).to.be.a('string');\r",
+                  "});\r",
+                  "\r",
+                  "// LEVEL 5: Business Logic Validation\r",
+                  "pm.test(\"City ID matches request\", function () {\r",
+                  "    pm.expect(response.id).to.equal(2643743);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"City name is London\", function () {\r",
+                  "    pm.expect(response.name.toLowerCase()).to.equal('london');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Temperature is in valid range\", function () {\r",
+                  "    pm.expect(response.main.temp).to.be.within(-100, 60);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Humidity is in valid range\", function () {\r",
+                  "    pm.expect(response.main.humidity).to.be.within(0, 100);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Coordinates are present and valid\", function () {\r",
+                  "    pm.expect(response.coord).to.have.property('lat');\r",
+                  "    pm.expect(response.coord).to.have.property('lon');\r",
+                  "    pm.expect(response.coord.lat).to.be.a('number');\r",
+                  "    pm.expect(response.coord.lon).to.be.a('number');\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?id=2643743&appid={{apiKey}}&units=metric",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "2643743"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "units",
+                  "value": "metric"
+                }
+              ]
+            },
+            "description": "# TC011: Get Current Weather - Valid City ID\n\n**Purpose:**\n\nVerify API returns correct weather data when searched by city ID.\n\n**Test Case:**\n\nHappy path - User provides OpenWeatherMap city ID for London\n\n**Parameters:**\n\n• id: 2643743 (London city ID)\n\n• appid: {{apiKey}}\n\n• units: metric\n\n**Expected Result:**\n\n• Status: 200 OK\n\n• Response contains weather data for London\n\n• City ID in response matches request\n\n• City name is London\n\n**Tests:**\n\n• Status code validation (200)\n\n• Response time check (< 2000ms)\n\n• Content-Type validation (JSON)\n\n• Response structure validation\n\n• City ID data type validation\n\n• Weather data type validation\n\n• Weather array validation\n\n• City ID matches request(2643743)\n\n• City name is 'London'\n\n• Temperature range validation\n\n• Humidity range validation\n\n• Coordinates present and valid"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Weather - Invalid City ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//1. Status and expected Error\r",
+                  "pm.test(\"Status code is 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is acceptable\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "// 2: Response Structure\r",
+                  "pm.test(\"Content-Type is JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response has error properties\", function () {\r",
+                  "    pm.expect(response).to.have.property('message');\r",
+                  "    pm.expect(response).to.have.property('cod');\r",
+                  "});\r",
+                  "\r",
+                  "// 5: Business Logic - No Weather Data\r",
+                  "pm.test(\"Response does NOT contain weather data\", function () {\r",
+                  "    pm.expect(response).to.not.have.property('weather');\r",
+                  "    pm.expect(response).to.not.have.property('main');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error message is meaningful\", function(){\r",
+                  "    pm.expect(response.message).to.be.a('string');\r",
+                  "    pm.expect(response.message).to.include('city not found');\r",
+                  "    pm.expect(response.message.length).to.be.above(0);\r",
+                  "\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?id=999999999&appid={{apiKey}}&units=metric",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "999999999"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "units",
+                  "value": "metric"
+                }
+              ]
+            },
+            "description": "# TC012: Get Current Weather - Invalid City ID\n\n**Purpose:**\n\nVerify API returns appropriate error for non-existent city ID.\n\n**Test Case:**\n\nNegative test - User provides invalid city ID\n\n**Parameters:**\n\n• id: 999999999 (invalid city ID)\n\n• appid: {{apiKey}}\n\n• units: metric\n\n**Expected Result:**\n\n• Status: 404 Not Found\n\n• Error message about invalid city ID\n\n• No weather data returned\n\n**Tests:**\n\n• Status code validation (404)\n\n• Response time check (<2000ms)\n\n• Content-Type validation (JSON)\n\n• Error properties validation\n\n• Error message present\n\n• Absence of weather data validation"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Current Weather by Zip Code",
+      "item": [
+        {
+          "name": "Get Current Weather - Valid Zip Code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1: Status code and response check\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "// 2: Response and Schema Structure\r",
+                  "pm.test(\"Content Type is JSON\", function(){\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response has expected top level fields\", function () {\r",
+                  "     pm.expect(response).to.have.property(\"coord\");\r",
+                  "    pm.expect(response).to.have.property(\"weather\");\r",
+                  "    pm.expect(response).to.have.property(\"main\");\r",
+                  "    pm.expect(response).to.have.property(\"sys\");\r",
+                  "    pm.expect(response).to.have.property(\"name\");\r",
+                  "\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// 3. Data Type Validation\r",
+                  "pm.test(\"Weather is an array\", function () {\r",
+                  "    pm.expect(response.weather).to.be.an('array');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Weather array is not empty\", function () {\r",
+                  "    pm.expect(response.weather.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Weather has expected data types\", function () {\r",
+                  "    pm.expect(response.weather[0].id).to.be.a('number');\r",
+                  "    pm.expect(response.weather[0].main).to.be.a('string');\r",
+                  "    pm.expect(response.weather[0].description).to.be.a('string');\r",
+                  "    pm.expect(response.name).to.be.a('string');\r",
+                  "    pm.expect(response.main.temp).to.be.a('number');\r",
+                  "    pm.expect(response.main.humidity).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Weather description is not empty\", function () {\r",
+                  "    pm.expect(response.weather[0].description).to.not.be.empty;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Temperature is within valid range\", function () {\r",
+                  "    pm.expect(response.main.temp).to.be.within(-100, 60);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Humidity is within valid range\", function(){\r",
+                  "    pm.expect(response.main.humidity).to.be.within(0,100);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Country is correct\", function(){\r",
+                  "    pm.expect(response.sys.country).to.equal(\"US\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Location name is correct\", function(){\r",
+                  "    pm.expect(response.name).to.equal(\"Mountain View\");\r",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?zip=94040,US&appid={{apiKey}}&units=metric",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "zip",
+                  "value": "94040,US"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "units",
+                  "value": "metric"
+                }
+              ]
+            },
+            "description": "# TC013: Get Current Weather - Valid ZIP Code\n\n**Purpose:**\n\nVerify API returns correct weather data when searched by ZIP code.\n\n**Test Case:**\n\nHappy path - User provides ZIP code with country code\n\n**Parameters:**\n\n• zip: 94040,US (Mountain View,  \nCalifornia)\n\n• appid: {{apiKey}}\n\n• units: metric\n\n**Expected Result:**\n\n• Status: 200 OK\n\n• Response contains weather data for Mountain View\n\n• Country code matches US\n\n• Location name correct\n\n**Tests:**\n\n• Status code validation (200)\n\n• Response time check (<2000ms)\n\n• Content-Type validation (JSON)\n\n• Response structure validation\n\n• Weather array validation\n\n• Weather data type validation\n\n• Weather array not empty\n\n• Weather description present\n\n• Temperature range validation\n\n• Humidity range validation\n\n• Country code is 'US'\n\n• Location name is 'Mountain View'"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Weather- Invalid Zip code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//Expected Error code and respponse\r",
+                  "pm.test(\"Status code is 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is acceptable\", function(){\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Content Type is JSON\", function(){\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response contains Error message\", function(){\r",
+                  "    pm.expect(response).to.have.property('message');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response contains Error code\", function(){\r",
+                  "    pm.expect(response).to.have.property('cod');\r",
+                  "    pm.expect(response.cod).to.equal('404');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error message is meaningful\", function () {\r",
+                  "    pm.expect(response.message).to.be.a(\"string\");\r",
+                  "    pm.expect(response.message.length).to.be.above(0);\r",
+                  "    pm.expect(response.message.toLowerCase()).to.include(\"not found\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response does not return weather data\", function(){\r",
+                  "    pm.expect(response).to.not.have.property('weather');\r",
+                  "\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response does not return main data\", function(){\r",
+                  "   pm.expect(response).to.not.have.property('main');\r",
+                  "   }); \r",
+                  "   "
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?zip=00000,ZZ&appid={{apiKey}}&units=metric",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "zip",
+                  "value": "00000,ZZ"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "units",
+                  "value": "metric"
+                }
+              ]
+            },
+            "description": "# TC014: Get Current Weather - Invalid ZIP Code\n\n**Purpose:**\n\nVerify API returns appropriate error for invalid ZIP code.\n\n**Test Case:**\n\nNegative test - User provides non-existent ZIP code\n\n**Parameters:**\n\n• zip: 00000,ZZ (invalid ZIP and country)\n\n• appid: {{apiKey}}\n\n• units: metric\n\n**Expected Result:**\n\n• Status: 404 Not Found\n\n• Error message about invalid ZIP\n\n• No weather data returned\n\n**Tests:**\n\n• Status code validation (404)\n\n• Response time check (<2000ms)\n\n• Content-Type validation (JSON)\n\n• Error properties validation\n\n• Error code validation (cod ='404')\n\n• Error message meaningful\n\n• Absence of weather data validation"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Response Formats & Parameters",
+      "item": [
+        {
+          "name": "Get weather in XML format",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1: Check if the response status code is 200\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "// Check if the response time is less than 200ms\r",
+                  "pm.test(\"Response time is less than 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "//2. Response and Schema Structure\r",
+                  "pm.test(\"Content Type is XML\", function(){\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/xml\");\r",
+                  "});\r",
+                  "\r",
+                  "// 3: XML Content Validation\r",
+                  "pm.test(\"Response body is XML format\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include(\"<?xml\");\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "//4. Response contains required tags\r",
+                  "pm.test(\"Response contains current tag\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include('<current>');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response contains temperature tag\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include('<temperature');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response contains humidity tag\", function(){\r",
+                  "    pm.expect(pm.response.text()).to.include('<humidity');\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Response contains weather tag\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include('<weather');\r",
+                  "});\r",
+                  "\r",
+                  "//5. Business Logic\r",
+                  "pm.test(\"Response contains city tag\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include('<city');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"City ID is correct\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include('id=\"2643743\"');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"City Name is correct\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include('name=\"London\"');\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?q=London&appid={{apiKey}}&units=metric&mode=xml",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "London"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "units",
+                  "value": "metric"
+                },
+                {
+                  "key": "mode",
+                  "value": "xml"
+                }
+              ]
+            },
+            "description": "# TC015: Get Current Weather - XML Response Format\n\n**Purpose:**\n\nVerify API can return weather data in XML format.\n\n**Test Case:**\n\nFormat test - User requests XML instead of JSON\n\n**Parameters:**\n\n• q: London\n\n• appid: {{apiKey}}\n\n• units: metric\n\n• mode: xml\n\n**Expected Result:**\n\n• Status: 200 OK\n\n• Content-Type: application/xml\n\n• Response in valid XML format\n\n• Contains weather data elements\n\n**Tests:**\n\n• Status code validation (200)\n\n• Response time check (< 2000ms)\n\n• Content-Type is XML\n\n• Response body is XML format\n\n• Contains tag\n\n• Contains tag\n\n• Contains tag\n\n• Contains tag\n\n• Contains tag\n\n• City ID is correct (2643743)\n\n• City name is 'London'"
+          },
+          "response": []
+        },
+        {
+          "name": "Get weather in different language",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1: Request Success\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "// 2: Response Structure\r",
+                  "pm.test(\"Content-Type is JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response has required fields\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"weather\");\r",
+                  "    pm.expect(response).to.have.property(\"main\");\r",
+                  "    pm.expect(response).to.have.property(\"name\");\r",
+                  "});\r",
+                  "\r",
+                  "// 3: Data Type Validation\r",
+                  "pm.test(\"Weather is an array\", function () {\r",
+                  "    pm.expect(response.weather).to.be.an('array');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Weather description is string\", function () {\r",
+                  "    pm.expect(response.weather[0].description).to.be.a('string');\r",
+                  "});\r",
+                  "\r",
+                  "// 4: Array Validation\r",
+                  "pm.test(\"Weather array is not empty\", function () {\r",
+                  "    pm.expect(response.weather.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Weather description exists and is not empty\", function () {\r",
+                  "    pm.expect(response.weather[0]).to.have.property('description');\r",
+                  "    pm.expect(response.weather[0].description).to.not.be.empty;\r",
+                  "});\r",
+                  "\r",
+                  "// 5: Business Logic ***\r",
+                  "pm.test(\"Weather Description contains a spanish word\", function () {\r",
+                  "    const description = response.weather[0].description.toLowerCase();\r",
+                  "    const spanishWords = ['nubes', 'lluvia', 'cielo', 'despejado', 'nublado', 'tormenta', 'nieve', 'niebla', 'bruma', 'algo de nubes', 'muy nuboso'];\r",
+                  "    const hasSpanish = spanishWords.some(word => description.includes(word));\r",
+                  "    pm.expect(hasSpanish).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "pm.test(\"Temperature data is valid\", function () {\r",
+                  "    pm.expect(response.main.temp).to.be.a('number');\r",
+                  "    pm.expect(response.main.temp).to.be.within(-100, 60);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?q=London&appid={{apiKey}}&units=metric&lang=es",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "London"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "units",
+                  "value": "metric"
+                },
+                {
+                  "key": "lang",
+                  "value": "es"
+                }
+              ]
+            },
+            "description": "# TC016: Get Current Weather - Different Language (Spanish)\n\n**Purpose:**\n\nVerify API returns weather description in requested language.\n\n**Test Case:**\n\nLocalization test - User requests Spanish language\n\n**Parameters:**\n\n• q: London\n\n• appid: {{apiKey}}\n\n• units: metric\n\n• lang: es (Spanish)\n\n**Expected Result:**\n\n• Status: 200 OK\n\n• Weather description in Spanish\n\n• Other data in standard format\n\n**Tests:**\n\n• Status code validation (200)\n\n• Response time check (<2000ms)\n\n• Content-Type validation (JSON)\n\n• Response structure validation\n\n• Weather array validation\n\n• Weather description is string\n\n• Weather array not empty\n\n• Weather description not empty\n\n• Description contains Spanish words\n\n• Temperature data is valid"
+          },
+          "response": []
+        },
+        {
+          "name": "Get weather with metric unit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1: Request Success\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "// 2: Response Structure\r",
+                  "pm.test(\"Content-Type is JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response has required fields\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"main\");\r",
+                  "    pm.expect(response).to.have.property(\"weather\");\r",
+                  "});\r",
+                  "\r",
+                  "// 3: Data Type Validation\r",
+                  "pm.test(\"Temperature is a number\", function () {\r",
+                  "    pm.expect(response.main.temp).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Humidity is a number\", function () {\r",
+                  "    pm.expect(response.main.humidity).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "// 5: Business Logic - Units Validation\r",
+                  "pm.test(\"Temperature is in reasonable range for metric\", function () {\r",
+                  "    // For metric (Celsius): -50 to 50 is reasonable\r",
+                  "    pm.expect(response.main.temp).to.be.within(-50, 50);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Weather data is complete\", function () {\r",
+                  "    pm.expect(response.weather).to.be.an('array');\r",
+                  "    pm.expect(response.weather.length).to.be.above(0);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?q=London&appid={{apiKey}}&units=metric",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "London"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "units",
+                  "value": "metric"
+                }
+              ]
+            },
+            "description": "# TC017: Get Current Weather - Metric Units (Celsius)\n\n**Purpose:**\n\nVerify API returns temperature  \nin Celsius when units=metric.\n\n**Test Case:**\n\nUnits test - User requests  \nmetric system\n\n**Parameters:**\n\n• q: London\n\n• appid: {{apiKey}}\n\n• units: metric\n\n**Expected Result:**\n\n• Status: 200 OK\n\n• Temperature in Celsius\n\n• Temperature in reasonable  \nrange (-50°C to 50°C)\n\n**Tests:**\n\n• Status code validation (200)\n\n• Response time check (<  \n2000ms)\n\n• Content-Type validation (JSON)\n\n• Response structure validation\n\n• Temperature is a number\n\n• Humidity is a number\n\n• Temperature in metric range  \n(-50 to 50°C)\n\n• Weather data complete"
+          },
+          "response": []
+        },
+        {
+          "name": "Get weather with imperial unit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1: Request Success\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "// 2: Response Structure\r",
+                  "pm.test(\"Content-Type is JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response has required fields\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"main\");\r",
+                  "    pm.expect(response).to.have.property(\"weather\");\r",
+                  "});\r",
+                  "\r",
+                  "// 3: Data Type Validation\r",
+                  "pm.test(\"Temperature is a number\", function () {\r",
+                  "    pm.expect(response.main.temp).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Humidity is a number\", function () {\r",
+                  "    pm.expect(response.main.humidity).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "// 5: Business Logic - Units Validation\r",
+                  "pm.test(\"Temperature is in reasonable range for imperial\", function () {\r",
+                  "    // For imperial (Fahrenheit): -58 to 122 is reasonable\r",
+                  "    pm.expect(response.main.temp).to.be.within(-58, 122);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Weather data is complete\", function () {\r",
+                  "    pm.expect(response.weather).to.be.an('array');\r",
+                  "    pm.expect(response.weather.length).to.be.above(0);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?q=London&appid={{apiKey}}&units=imperial",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "London"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "units",
+                  "value": "imperial"
+                }
+              ]
+            },
+            "description": "# TC018: Get Current Weather - Imperial Units (Fahrenheit)\n\n**Purpose:**\n\nVerify API returns temperature  \nin Fahrenheit when units=imperial.\n\n**Test Case:**\n\nUnits test - User requests  \nimperial system\n\n**Parameters:**\n\n• q: London\n\n• appid: {{apiKey}}\n\n• units: imperial\n\n**Expected Result:**\n\n• Status: 200 OK\n\n• Temperature in Fahrenheit\n\n• Temperature in reasonable  \nrange (-58°F to 122°F)\n\n**Tests:**\n\n• Status code validation (200)\n\n• Response time check (<  \n2000ms)\n\n• Content-Type validation (JSON)\n\n• Response structure validation\n\n• Temperature is a number\n\n• Humidity is a number\n\n• Temperature in imperial range  \n(-58 to 122°F)\n\n• Weather data complete"
+          },
+          "response": []
+        },
+        {
+          "name": "Get weather with standard unit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1: Request Success\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "// 2: Response Structure\r",
+                  "pm.test(\"Content-Type is JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response has required fields\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"main\");\r",
+                  "    pm.expect(response).to.have.property(\"weather\");\r",
+                  "});\r",
+                  "\r",
+                  "// 3: Data Type Validation\r",
+                  "pm.test(\"Temperature is a number\", function () {\r",
+                  "    pm.expect(response.main.temp).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Humidity is a number\", function () {\r",
+                  "    pm.expect(response.main.humidity).to.be.a('number');\r",
+                  "});\r",
+                  "\r",
+                  "// 5: Business Logic - Units Validation\r",
+                  "pm.test(\"Temperature is in reasonable range for standard\", function () {\r",
+                  "    // For standard (Kelvin): 223K to 323K is reasonable\r",
+                  "    pm.expect(response.main.temp).to.be.within(223, 323);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Weather data is complete\", function () {\r",
+                  "    pm.expect(response.weather).to.be.an('array');\r",
+                  "    pm.expect(response.weather.length).to.be.above(0);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?q=London&appid={{apiKey}}&units=standard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "London"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "units",
+                  "value": "standard"
+                }
+              ]
+            },
+            "description": "# TC019: Get Current Weather - Standard Units (Kelvin)\n\n**Purpose:**\n\nVerify API returns temperature  \nin Kelvin when units=standard.\n\n**Test Case:**\n\nUnits test - User requests  \nstandard (Kelvin) system\n\n**Parameters:**\n\n• q: London\n\n• appid: {{apiKey}}\n\n• units: standard\n\n**Expected Result:**\n\n• Status: 200 OK\n\n• Temperature in Kelvin\n\n• Temperature in reasonable  \nrange (223K to 323K)\n\n**Tests:**\n\n• Status code validation (200)\n\n• Response time check (<  \n2000ms)\n\n• Content-Type validation (JSON)\n\n• Response structure validation\n\n• Temperature is a number\n\n• Humidity is a number\n\n• Temperature in standard range  \n(223 to 323K)\n\n• Weather data complete"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

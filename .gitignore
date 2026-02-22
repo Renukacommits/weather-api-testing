@@ -1,0 +1,10 @@
+OpenWeatherAPI.postman_environment.json
+node_modules/
+*.log
+.DS_Store
+
+# Personal files - not for GitHub
+Test_Descriptions for documentation purpose.docx
+WEATHER API PROJECT I - TEST PLAN.txt
+Test_Execution_Summary_Report.docx
+Test_Plan_Approval.docx
