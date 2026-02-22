@@ -8,3 +8,7 @@ Test_Descriptions for documentation purpose.docx
 WEATHER API PROJECT I - TEST PLAN.txt
 Test_Execution_Summary_Report.docx
 Test_Plan_Approval.docx
+
+# Newman HTML reports contain environment data
+newman-report.html
+reports/*.html
