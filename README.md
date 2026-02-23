@@ -114,6 +114,7 @@ weather-api-testing/
 ├── environment/       # Environment template (API key configurable)
 ├── documentation/     # Test plan, test cases, traceability, execution summary
 ├── reports/           # Newman HTML reports
+├── screenshots/
 └── README.md
 ```
 
